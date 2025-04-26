@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm & Stopwatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <!-- Alarm Section -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-center">Alarm</h2>
+            <div class="flex flex-col items-center">
+                <input type="time" id="alarmTime" class="border p-2 rounded mb-4 w-full" />
+                <button onclick="setAlarm()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Set Alarm</button>
+                <p id="alarmStatus" class="mt-4 text-red-500"></p>
+            </div>
+        </div>
+
+        <!-- Stopwatch Section -->
+        <div>
+            <h2 class="text-2xl font-bold mb-4 text-center">Stopwatch</h2>
+            <div class="flex flex-col items-center">
+                <div id="stopwatch" class="text-3xl font-mono mb-4">00:00:00</div>
+                <div class="flex space-x-2">
+                    <button onclick="startStopwatch()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Start</button>
+                    <button onclick="pauseStopwatch()" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Pause</button>
+                    <button onclick="resetStopwatch()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Alarm Functionality
+        let alarmTimeout = null;
+
+        function setAlarm() {
+            const alarmTime = document.getElementById('alarmTime').value;
+            if (!alarmTime) {
+                document.getElementById('alarmStatus').textContent = 'Please select a time!';
+                return;
+            }
+
+            const now = new Date();
+            const [hours, minutes] = alarmTime.split(':');
+            const alarmDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+
+            if (alarmDate <= now) {
+                alarmDate.setDate(alarmDate.getDate() + 1);
+            }
+
+            const timeDiff = alarmDate - now;
+            document.getElementById('alarmStatus').textContent = `Alarm set for ${alarmTime}`;
+
+            if (alarmTimeout) {
+                clearTimeout(alarmTimeout);
+            }
+
+            alarmTimeout = setTimeout(() => {
+                alert('Alarm ringing!');
+                document.getElementById('alarmStatus').textContent = '';
+            }, timeDiff);
+        }
+
+        // Stopwatch Functionality
+        let stopwatchInterval = null;
+        let stopwatchTime = 0;
+        let running = false;
+
+        function startStopwatch() {
+            if (!running) {
+                running = true;
+                stopwatchInterval = setInterval(() => {
+                    stopwatchTime += 10;
+                    updateStopwatch();
+                }, 10);
+            }
+        }
+
+        function pauseStopwatch() {
+            if (running) {
+                running = false;
+                clearInterval(stopwatchInterval);
+            }
+        }
+
+        function resetStopwatch() {
+            running = false;
+            clearInterval(stopwatchInterval);
+            stopwatchTime = 0;
+            updateStopwatch();
+        }
+
+        function updateStopwatch() {
+            const hours = Math.floor(stopwatchTime / (1000 * 60 * 60));
+            const minutes = Math.floor((stopwatchTime % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((stopwatchTime % (1000 * 60)) / 1000);
+            const milliseconds = Math.floor((stopwatchTime % 1000) / 10);
+
+            document.getElementById('stopwatch').textContent = 
+                `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+
+        function pad(num) {
+            return num < 10 ? `0${num}` : num;
+        }
+    </script>
+</body>
+</html>
